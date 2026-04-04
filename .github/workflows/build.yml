@@ -30,15 +30,15 @@ jobs:
             kernel/linux/arch/arm64/include/
             kernel/linux/tools/arch/arm64/include/
 
-      - name: Download minimal toolchain
-        run: |
-          gh release download v12.2.0 --repo epicxafang/kp-toolchain --pattern '*.tar.gz'
-          tar xzf toolchain-aarch64-none-elf-12.2-minimal.tar.gz
-          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
+      - name: Checkout toolchain
+        uses: actions/checkout@v5
+        with:
+          repository: epicxafang/kp-toolchain
+          path: toolchain
 
       - name: Build
         env:
-          TARGET_COMPILE: aarch64-none-elf-
+          TARGET_COMPILE: ${{ github.workspace }}/toolchain/bin/aarch64-none-elf-
           KP_DIR: ${{ github.workspace }}/KernelPatch
         run: make clean && make
 
