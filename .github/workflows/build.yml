@@ -33,6 +33,8 @@ jobs:
             kernel/include/
             kernel/patch/include/
             kernel/linux/include/
+            kernel/linux/arch/arm64/include/
+            kernel/linux/tools/arch/arm64/include/
 
       - name: Cache ARM toolchain
         id: cache-tc
