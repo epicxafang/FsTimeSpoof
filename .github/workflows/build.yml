@@ -1,0 +1,62 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'FsTimeSpoof.c'
+      - 'Makefile'
+      - '.github/workflows/build.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  TC_URL: https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf.tar.xz
+  TC_DIR: arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf
+  KP_REPO: https://github.com/bmax121/KernelPatch.git
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout FsTimeSpoof
+        uses: actions/checkout@v4
+
+      - name: Checkout KernelPatch (headers only)
+        uses: actions/checkout@v4
+        with:
+          repository: bmax121/KernelPatch
+          path: KernelPatch
+          sparse-checkout: |
+            kernel/include/
+            kernel/patch/include/
+            kernel/linux/include/
+
+      - name: Cache ARM toolchain
+        id: cache-tc
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TC_DIR }}
+          key: toolchain-${{ env.TC_DIR }}-v1
+
+      - name: Download & extract toolchain
+        if: steps.cache-tc.outputs.cache-hit != 'true'
+        run: |
+          wget -q "${{ env.TC_URL }}" -O toolchain.tar.xz
+          tar xf toolchain.tar.xz
+          rm toolchain.tar.xz
+
+      - name: Build
+        env:
+          TARGET_COMPILE: ${{ github.workspace }}/${{ env.TC_DIR }}/bin/aarch64-none-elf-
+          KP_DIR: ${{ github.workspace }}/KernelPatch
+        run: make clean && make
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FsTimeSpoof
+          path: FsTimeSpoof.kpm
+          retention-days: 30
