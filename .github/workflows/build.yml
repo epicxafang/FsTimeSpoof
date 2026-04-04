@@ -18,7 +18,18 @@ jobs:
       - name: Checkout FsTimeSpoof
         uses: actions/checkout@v5
 
+      - name: Cache toolchain & KernelPatch headers
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          key: kpdeps-v1-${{ github.run_id }}
+          restore-keys: kpdeps-v1-
+          path: |
+            toolchain
+            KernelPatch
+
       - name: Checkout KernelPatch (headers only)
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         uses: actions/checkout@v5
         with:
           repository: bmax121/KernelPatch
@@ -31,6 +42,7 @@ jobs:
             kernel/linux/tools/arch/arm64/include/
 
       - name: Checkout toolchain
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         uses: actions/checkout@v5
         with:
           repository: epicxafang/kp-toolchain
