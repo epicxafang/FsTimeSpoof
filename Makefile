@@ -6,22 +6,22 @@ ifndef KP_DIR
     KP_DIR = ../../KernelPatch
 endif
 
-CC = $(TARGET_COMPILE)gcc
+CC  = $(TARGET_COMPILE)gcc
 STRIP = $(TARGET_COMPILE)strip
 
-INCLUDE_DIRS := . include patch/include linux/include linux/arch/arm64/include linux/tools/arch/arm64/include
+INCLUDE_DIRS := include patch/include linux/include linux/arch/arm64/include linux/tools/arch/arm64/include
 
 INCLUDE_FLAGS := $(foreach dir,$(INCLUDE_DIRS),-I$(KP_DIR)/kernel/$(dir))
 
-objs := FsTimeSpoof.o
+objs := src/FsTimeSpoof.o
 
 all: FsTimeSpoof.kpm
 
-FsTimeSpoof.kpm: FsTimeSpoof.o
+FsTimeSpoof.kpm: src/FsTimeSpoof.o
 	$(CC) -r -o $@ $^
 	$(STRIP) --strip-unneeded $@
 
-%.o: %.c
+src/%.o: src/%.c
 	$(CC) -Wall -Wextra -O2 $(CFLAGS) $(INCLUDE_FLAGS) -c -o $@ $<
 
 .PHONY: clean
