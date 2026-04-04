@@ -19,15 +19,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
       - name: Checkout FsTimeSpoof
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Checkout KernelPatch (headers only)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: bmax121/KernelPatch
           path: KernelPatch
