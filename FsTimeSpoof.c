@@ -227,12 +227,12 @@ static long faketime_control0(const char *ctl_args, char *__user out_msg, int ou
     if (!ctl_args) return -EINVAL;
     if (!strcmp(ctl_args, "clear")) {
         clear_all_entries();
-        if (out_msg && outlen > 0) compat_copy_to_user(out_msg, "cleared", 8);
+        if (out_msg && outlen > 0) compat_copy_to_user(out_msg, "cleared", sizeof("cleared"));
         return 0;
     }
     int added = parse_and_add(ctl_args);
     char resp[32];
-    memcpy(resp, "added ", 6);
+    memcpy(resp, "added ", sizeof("added "));
     int pos = 6 + itoa(resp + 6, added);
     resp[pos] = '\0';
     if (out_msg && outlen > 0) compat_copy_to_user(out_msg, resp, pos + 1);
