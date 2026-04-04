@@ -19,15 +19,14 @@ KPM_DESCRIPTION("Spoof the modification dates of files and folders");
 #define MAX_FAKE_ENTRIES 64
 #define PATH_MAX_LEN 256
 
-/* Matches kernel-internal struct stat layout for newfstatat on AArch64 */
 struct kstat_buf {
-    uint64_t _pad0[9];          /* 72 bytes before timestamps */
-    int64_t  atime_sec;         /* offset 72  */
-    uint32_t atime_nsec;        /* offset 80  */
-    int64_t  mtime_sec;         /* offset 88  */
-    uint32_t mtime_nsec;        /* offset 96  */
-    int64_t  ctime_sec;         /* offset 104 */
-    uint32_t ctime_nsec;        /* offset 112 */
+    uint64_t _pad0[9];
+    int64_t  atime_sec;
+    uint32_t atime_nsec;
+    int64_t  mtime_sec;
+    uint32_t mtime_nsec;
+    int64_t  ctime_sec;
+    uint32_t ctime_nsec;
 };
 
 struct fake_entry {
@@ -105,7 +104,6 @@ static void patch_statx(void *buf, const struct fake_entry *e)
     sx->stx_mtime.tv_sec = e->sec;   sx->stx_mtime.tv_nsec = e->nsec;
 }
 
-/* Common before-callback: extract path from userspace arg, look up in table */
 static const struct fake_entry *resolve_path_from_args(void *args, int path_arg_index)
 {
     const char __user *ufilename = (typeof(ufilename))syscall_argn(args, path_arg_index);
@@ -116,7 +114,6 @@ static const struct fake_entry *resolve_path_from_args(void *args, int path_arg_
     return find_entry(path);
 }
 
-/* Common after-callback: copy buf from user, patch, copy back, free */
 typedef void (*patch_fn)(void *, const struct fake_entry *);
 
 static void after_generic(hook_fargs0_t *args, int buf_arg_index,
@@ -159,7 +156,6 @@ static void after_statx(hook_fargs5_t *args, void *udata)
     after_generic((hook_fargs0_t *)args, 4, sizeof(struct statx), patch_statx);
 }
 
-/* Parse "path timestamp" lines from a string, add matching entries */
 static int parse_and_add(const char *args)
 {
     const char *p = args;
@@ -185,7 +181,6 @@ static int parse_and_add(const char *args)
     return added;
 }
 
-/* Write integer n into buf, return digits written (no NUL terminator) */
 static int itoa(char *buf, int n)
 {
     char tmp[12];
