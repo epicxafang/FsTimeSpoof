@@ -11,10 +11,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  TC_URL: https://developer.arm.com/-/media/Files/downloads/gnu/12.2.rel1/binrel/arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf.tar.xz
-  TC_DIR: arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-elf
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,23 +30,15 @@ jobs:
             kernel/linux/arch/arm64/include/
             kernel/linux/tools/arch/arm64/include/
 
-      - name: Cache ARM toolchain
-        id: cache-tc
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.TC_DIR }}
-          key: toolchain-${{ env.TC_DIR }}-v1
-
-      - name: Download & extract toolchain
-        if: steps.cache-tc.outputs.cache-hit != 'true'
+      - name: Download minimal toolchain
         run: |
-          wget -q "${{ env.TC_URL }}" -O toolchain.tar.xz
-          tar xf toolchain.tar.xz
-          rm toolchain.tar.xz
+          gh release download v12.2.0 --repo epicxafang/kp-toolchain --pattern '*.tar.gz'
+          tar xzf toolchain-aarch64-none-elf-12.2-minimal.tar.gz
+          echo "$GITHUB_WORKSPACE/bin" >> $GITHUB_PATH
 
       - name: Build
         env:
-          TARGET_COMPILE: ${{ github.workspace }}/${{ env.TC_DIR }}/bin/aarch64-none-elf-
+          TARGET_COMPILE: aarch64-none-elf-
           KP_DIR: ${{ github.workspace }}/KernelPatch
         run: make clean && make
 
