@@ -45,7 +45,7 @@ jobs:
         if: steps.cache-deps.outputs.cache-hit != 'true'
         uses: actions/checkout@v5
         with:
-          repository: epicxafang/kp-toolchain
+          repository: epicxafang/aarch64-none-elf-toolchain
           path: toolchain
 
       - name: Build
